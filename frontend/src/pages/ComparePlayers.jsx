@@ -1,24 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import Select from 'react-select';
 import './ComparePlayers.css';
-import { Bar } from 'react-chartjs-2';
+
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
     BarElement,
-    Title,
     Tooltip,
     Legend
 } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 function ComparePlayers() {
     const [player1, setPlayer1] = useState('');
@@ -29,8 +23,12 @@ function ComparePlayers() {
     useEffect(() => {
         fetch('http://localhost:8000/players')
             .then(res => res.json())
-            .then(data => setPlayerList(data.map(p => p.full_name)));
+            .then(data => {
+                console.log(data); // ← add this
+                setPlayerList(data.map(p => p.full_name));
+            });
     }, []);
+
 
     const handleCompare = async () => {
         const response = await fetch(`http://localhost:8000/compare?player1=${player1}&player2=${player2}`);
@@ -38,72 +36,96 @@ function ComparePlayers() {
         setComparison(data);
     };
 
+    const playerOptions = playerList.map(name => ({ value: name, label: name }));
+
     return (
         <div className="compare-container">
             <h1>🆚 Compare Two NBA Players</h1>
             <div className="inputs">
-                <input list="players" placeholder="Player 1" value={player1} onChange={e => setPlayer1(e.target.value)} />
-                <input list="players" placeholder="Player 2" value={player2} onChange={e => setPlayer2(e.target.value)} />
-                <datalist id="players">
-                    {playerList.map((name, idx) => <option key={idx} value={name} />)}
-                </datalist>
+                <Select
+                    options={playerOptions}
+                    placeholder="Select Player 1"
+                    value={playerOptions.find(p => p.value === player1)}
+                    onChange={(selected) => setPlayer1(selected.value)}
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                    filterOption={(option, input) => {
+                        const name = option.label.toLowerCase();
+                        const [first, last] = name.split(' ');
+                        return (
+                            first.startsWith(input.toLowerCase()) ||
+                            last.startsWith(input.toLowerCase())
+                        );
+                    }}
+                />
+
+
+                <Select
+                    options={playerOptions}
+                    placeholder="Select Player 2"
+                    value={playerOptions.find(p => p.value === player2)}
+                    onChange={selected => setPlayer2(selected.value)}
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                />
+
                 <button onClick={handleCompare}>Compare</button>
             </div>
 
-            {comparison && comparison.player1 && comparison.player2 && (
-                <div className="bar-chart-container">
-                    <h3>📊 Stat Comparison: {comparison.player1.name} vs {comparison.player2.name}</h3>
-                    <p>This chart compares each player's per-game averages across key performance categories.</p>
-                    <Bar
-                        data={{
-                            labels: ['Points', 'Assists', 'Rebounds', 'Steals', 'Blocks'],
-                            datasets: [
-                                {
-                                    label: comparison.player1.name,
-                                    data: [
-                                        comparison.player1.stats.pts,
-                                        comparison.player1.stats.ast,
-                                        comparison.player1.stats.reb,
-                                        comparison.player1.stats.stl,
-                                        comparison.player1.stats.blk
-                                    ],
-                                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            {comparison && !comparison.error && (
+                <>
+                    <h2 style={{ marginTop: '30px' }}>{comparison.summary}</h2>
+
+                    <div className="comparison-result">
+                        {[comparison.player1, comparison.player2].map((p, i) => (
+                            <div key={i} className="player-card">
+                                <h2>{p.name}</h2>
+                                <p><strong>Predicted Score:</strong> {p.score}</p>
+                                <p><strong>Fantasy Points:</strong> {p.fantasy_points}</p>
+                                <ul>
+                                    {Object.entries(p.stats).map(([stat, value]) => (
+                                        <li key={stat}>
+                                            {stat.toUpperCase()}: {value.toFixed(2)}{' '}
+                                            {comparison.category_winners[stat] === `Player ${i + 1}` && '🏆'}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bar-chart-container">
+                        <h3>📊 Stat Comparison (Bar Chart)</h3>
+                        <Bar
+                            data={{
+                                labels: Object.keys(comparison.player1.stats),
+                                datasets: [
+                                    {
+                                        label: comparison.player1.name,
+                                        data: Object.values(comparison.player1.stats),
+                                        backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                                    },
+                                    {
+                                        label: comparison.player2.name,
+                                        data: Object.values(comparison.player2.stats),
+                                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                                    }
+                                ]
+                            }}
+                            options={{
+                                responsive: true,
+                                plugins: {
+                                    legend: { position: 'top' }
                                 },
-                                {
-                                    label: comparison.player2.name,
-                                    data: [
-                                        comparison.player2.stats.pts,
-                                        comparison.player2.stats.ast,
-                                        comparison.player2.stats.reb,
-                                        comparison.player2.stats.stl,
-                                        comparison.player2.stats.blk
-                                    ],
-                                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                                }
-                            ]
-                        }}
-                        options={{
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top'
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Player Stat Comparison (Per Game)',
-                                    font: {
-                                        size: 18
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
                                     }
                                 }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }}
-                    />
-                </div>
+                            }}
+                        />
+                    </div>
+                </>
             )}
         </div>
     );

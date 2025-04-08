@@ -1,72 +1,159 @@
 .home-wrapper {
     font-family: 'Segoe UI', sans-serif;
     color: #333;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.home-wrapper.dark {
+    background-color: #121212;
+    color: #eaeaea;
 }
 
 .hero-section {
     text-align: center;
-    padding: 60px 20px;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 80px 20px;
+    background: linear-gradient(-45deg, #1e3c72, #2a5298, #3f4c6b, #1e3c72);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
     color: white;
 }
 
+.home-wrapper.dark .hero-section {
+    background: linear-gradient(-45deg, #111, #222, #333, #111);
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .hero-section h1 {
-    font-size: 42px;
-    margin-bottom: 10px;
+    font-size: 48px;
+    margin-bottom: 20px;
 }
 
 .hero-section p {
-    font-size: 18px;
-    max-width: 600px;
-    margin: auto;
+    font-size: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.cta-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 .cta-button {
-    margin-top: 25px;
     padding: 15px 30px;
     font-size: 18px;
     background-color: #ffcc00;
     color: #1e1e1e;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .cta-button:hover {
     background-color: #ffd633;
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cta-button.secondary {
+    background-color: white;
+    color: #1e3c72;
+    border: 2px solid #1e3c72;
+}
+
+.cta-button.secondary:hover {
+    background-color: #f0f0f0;
+}
+
+.wave-divider svg {
+    display: block;
+    width: 100%;
+    margin-top: -1px;
 }
 
 .features-section {
     display: flex;
     justify-content: space-around;
-    padding: 50px 10%;
+    padding: 60px 10%;
     background-color: #f9f9f9;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.home-wrapper.dark .features-section {
+    background-color: #1a1a1a;
 }
 
 .feature-card {
-    max-width: 300px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 320px;
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.feature-card p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.home-wrapper.dark .feature-card {
+    background: #2c2c2c;
+    color: #eaeaea;
 }
 
 .list-container {
-    padding: 40px;
+    padding: 50px 20px;
     text-align: center;
+    background-color: #ffffff;
+}
+
+.home-wrapper.dark .list-container {
+    background-color: #121212;
+}
+
+.list-container h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
 }
 
 .list-group {
     list-style: none;
     padding: 0;
     max-width: 400px;
-    margin: auto;
+    margin: 0 auto;
 }
 
 .list-group-item {
@@ -76,10 +163,44 @@
     margin: 5px 0;
     cursor: pointer;
     border-radius: 6px;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.list-group-item:hover {
+    background-color: #ddd;
 }
 
 .list-group-item.active {
     background-color: #1e3c72;
     color: white;
     font-weight: bold;
+}
+
+.player-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.dark-toggle {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: none;
+    color: white;
+    font-size: 18px;
+    border: 2px solid white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 999;
+}
+
+.home-wrapper.dark .dark-toggle {
+    color: #fff;
+    border-color: #fff;
 }
